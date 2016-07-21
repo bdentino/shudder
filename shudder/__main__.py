@@ -22,11 +22,20 @@ import requests
 
 
 if __name__ == '__main__':
-    sqs_connection, sqs_queue = queue.create_queue()
-    sns_connection, subscription_arn = queue.subscribe_sns(sqs_queue)
-    while True:
-        if queue.poll_queue(sqs_connection, sqs_queue) or metadata.poll_instance_metadata():
-            queue.clean_up_sns(sns_connection, subscription_arn, sqs_queue)
-            requests.get(CONFIG["endpoint"])
-            break
-        time.sleep(5)
+  sqs_connection, sqs_queue = queue.create_queue()
+  sns_connection, subscription_arn = queue.subscribe_sns(sqs_queue)
+  while True:
+    if queue.poll_queue(sqs_connection, sqs_queue) or metadata.poll_instance_metadata():
+      try:
+        queue.clean_up_sns(sns_connection, subscription_arn, sqs_queue)
+      except:
+        print("Unexpected error caught while cleaning up queue:", sys.exc_info()[0])
+
+      try:
+        requests.get(CONFIG["endpoint"])
+      except:
+        print("Unexpected error caught while hitting termination endpoint:", sys.exc_info()[0])
+
+        break
+    time.sleep(5)
+  print("Shudder complete")
