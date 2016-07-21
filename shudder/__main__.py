@@ -19,7 +19,7 @@ from shudder.config import CONFIG
 
 import time
 import requests
-
+import sys
 
 if __name__ == '__main__':
   sqs_connection, sqs_queue = queue.create_queue()
